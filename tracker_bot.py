@@ -21,7 +21,7 @@ class TrackerBot(commands.Bot):
         @self.command(name="upset", pass_context=True)
         async def upset(ctx, arg1, arg2):
             if self._check_if_tourney_and_event_exists(arg1, arg2):
-                self._upset_tournies[arg1] = UpsetTracker(arg1, arg2, self._startgg_client)
+                self._upset_tournies[arg1] = UpsetTracker(arg1, arg2, self._startgg_client, ctx.channel)
                 await ctx.channel.send("Now tracking upsets for event " + arg2 + " in tournament " + arg1)
             else:
                 await ctx.channel.send("Unable to find event in tourney. Please check your spelling or type !help for help on formatting.")
