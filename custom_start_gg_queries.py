@@ -1,4 +1,4 @@
-GET_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
+SHOW_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
   event(id: $eventId) {
     tournament {
       id
@@ -55,3 +55,5 @@ GET_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
   }
 }
 """
+
+SHOW_EVENT_STATUS_QUERY = """"""
