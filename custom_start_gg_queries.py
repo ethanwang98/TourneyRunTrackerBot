@@ -5,6 +5,7 @@ SHOW_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
       name
     }
     name
+    state
     sets(page: $page, perPage: 18, sortType: STANDARD) {
       nodes {
         fullRoundText
@@ -56,4 +57,15 @@ SHOW_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
 }
 """
 
-SHOW_EVENT_STATUS_QUERY = """"""
+SHOW_EVENT_METADATA = """query ($tourneySlug: String!) {
+  tournament(slug: $tourneySlug) {
+    name
+    events {
+      id
+      slug
+      name
+      state
+    }
+  }
+}
+"""
