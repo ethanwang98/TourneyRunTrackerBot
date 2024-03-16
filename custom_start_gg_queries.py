@@ -1,4 +1,4 @@
-SHOW_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
+SHOW_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!, $filters: SetFilters!) {
   event(id: $eventId) {
     tournament {
       id
@@ -6,7 +6,7 @@ SHOW_SETS_WITH_SEED_QUERY = """query EventSets($eventId: ID!, $page: Int!) {
     }
     name
     state
-    sets(page: $page, perPage: 18, sortType: STANDARD) {
+    sets(page: $page, perPage: 18, sortType: STANDARD, filters: $filters) {
       nodes {
         fullRoundText
         games {

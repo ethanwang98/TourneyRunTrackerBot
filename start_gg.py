@@ -1,6 +1,8 @@
 from pysmashgg import SmashGG, tournaments, api, filters
 from custom_start_gg_queries import *
 
+import time
+
 
 class StartGG(SmashGG):
     def __init__(self, key):
@@ -9,7 +11,7 @@ class StartGG(SmashGG):
     def tournament_show_sets(self, tournament_name: str, event_name: str, page_num: int) -> dict:
         data = {}
         event_id = tournaments.get_event_id(tournament_name, event_name, self.header, self.auto_retry)
-        variables = {"eventId": event_id, "page": page_num}
+        variables = {"eventId": event_id, "page": page_num, "filters": {"updatedAfter": int(time.time()) - 70, "state": 3}}
         response = api.run_query(SHOW_SETS_WITH_SEED_QUERY, variables, self.header, self.auto_retry)
         sets = filters.show_sets_filter(response)
 
