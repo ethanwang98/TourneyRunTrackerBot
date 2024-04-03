@@ -54,9 +54,10 @@ class TrackerBot(commands.Bot):
 
         @self.command(name="test", pass_context=True)
         async def test_query(ctx):
-            sets = self._startgg_client.tournament_show_sets("brick-d-up-5", "ultimate-singles", 1)
-            for s in sets['sets']:
-                print(s['entrant1Name'] + " - " + s['entrant2Name'])
+            await ctx.channel.send(embed=discord.Embed(title="UPSET", description="Player A 2-0 Player B\nUpset Factor 3", color=discord.Color.blue()))
+            #sets = self._startgg_client.tournament_show_sets("brick-d-up-5", "ultimate-singles", 1)
+            #for s in sets['sets']:
+                #print(s['entrant1Name'] + " - " + s['entrant2Name'])
 
     @tasks.loop(seconds=30)
     async def check_for_completed_tournies(self):

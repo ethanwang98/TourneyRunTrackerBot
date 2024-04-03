@@ -1,8 +1,9 @@
+import discord
 from discord.ext import tasks
 from start_gg import StartGG
 
 from math import log, floor, ceil
-import logging
+import asyncio
 
 
 class UpsetTracker:
@@ -15,7 +16,6 @@ class UpsetTracker:
         self._startgg_client = startgg_client
         self._channel = channel
         self._minutes_since_last_change = 0
-        self._logger = logging.getLogger()
         self.complete = False
 
         self.check_for_tourney_updates.start()
@@ -23,6 +23,7 @@ class UpsetTracker:
     @tasks.loop(seconds=60)
     async def check_for_tourney_updates(self):
         """Checks for newly completed tournament sets every 60 seconds"""
+        print("Checking for updates")
         current_page = 1
 
         while True:
@@ -53,27 +54,31 @@ class UpsetTracker:
     async def _send_upset_messages(self, sets: dict) -> None:
         """Checks if the lower seed won and sends messages to the Discord channel if so"""
         for tourney_set in sets:
-            self._logger.info("Set completed: {} - {}".format(tourney_set['entrant1Name'], tourney_set['entrant2Name']))
-            if tourney_set['winnerId'] == tourney_set['entrant1Id'] and tourney_set['entrant1Seed'] > tourney_set['entrant2Seed'] and tourney_set['entrant2Score'] > -1:
-                upset_factor = self._calculate_upset_factor(tourney_set['entrant1Seed'], tourney_set['entrant2Seed'])
-                if upset_factor > 0:
-                    await self._channel.send(
-                        "UPSET in {} {}: {} {} - {} {}, Upset Factor: {}".format(self._tourney_name, self._event_name,
-                                                                                 tourney_set['entrant1Name'],
-                                                                                 tourney_set['entrant1Score'],
-                                                                                 tourney_set['entrant2Score'],
-                                                                                 tourney_set['entrant2Name'],
-                                                                                 upset_factor))
-            elif tourney_set['winnerId'] == tourney_set['entrant2Id'] and tourney_set['entrant2Seed'] > tourney_set['entrant1Seed'] and tourney_set['entrant1Score'] > -1:
-                upset_factor = self._calculate_upset_factor(tourney_set['entrant1Seed'], tourney_set['entrant2Seed'])
-                if upset_factor > 0:
-                    await self._channel.send(
-                        "UPSET in {} {}: {} {} - {} {}, Upset Factor: {}".format(self._tourney_name, self._event_name,
-                                                                                 tourney_set['entrant2Name'],
-                                                                                 tourney_set['entrant2Score'],
-                                                                                 tourney_set['entrant1Score'],
-                                                                                 tourney_set['entrant1Name'],
-                                                                                 upset_factor))
+            print("Set completed: {} - {}".format(tourney_set['entrant1Name'], tourney_set['entrant2Name']))
+            upset_factor = self._calculate_upset_factor(tourney_set['entrant1Seed'], tourney_set['entrant2Seed'])
+            if upset_factor > 0:
+                embed_title = "UPSET in {} {}".format(self._tourney_name, self._event_name)
+                winner_name = None
+                winner_score = None
+                loser_name = None
+                loser_score = None
+
+                if tourney_set['winnerId'] == tourney_set['entrant1Id'] and tourney_set['entrant1Seed'] > tourney_set['entrant2Seed'] and tourney_set['entrant2Score'] > -1:
+                    winner_name = tourney_set['entrant1Name']
+                    winner_score = tourney_set['entrant1Score']
+                    loser_name = tourney_set['entrant2Name']
+                    loser_score = tourney_set['entrant2Score']
+                elif tourney_set['winnerId'] == tourney_set['entrant2Id'] and tourney_set['entrant2Seed'] > tourney_set['entrant1Seed'] and tourney_set['entrant1Score'] > -1:
+                    winner_name = tourney_set['entrant2Name']
+                    winner_score = tourney_set['entrant2Score']
+                    loser_name = tourney_set['entrant1Name']
+                    loser_score = tourney_set['entrant1Score']
+
+                if winner_name is not None and winner_score is not None and loser_name is not None and loser_score is not None:
+                    embed_desc = "{} {} - {} {}\nUpset Factor: {}".format(winner_name, winner_score, loser_score, loser_name, upset_factor)
+                    await self._channel.send(embed=discord.Embed(title=embed_title, description=embed_desc, color=discord.Color.blue()))
+
+            await asyncio.sleep(1)
 
     def _calculate_upset_factor(self, seed_1: int, seed_2: int) -> int:
         """Uses the upset factor formula used on PGStats"""
